@@ -5,6 +5,7 @@
  *
  * Copyright (c) 2013-2016 Simon Fraser University Library
  * Copyright (c) 2003-2016 John Willinsky
+ * Changed for OJS 3 by Daniela Wolf, Heidelberg University Library
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class KeywordCloudBlockPlugin
@@ -36,30 +37,6 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
 		return __('plugins.block.keywordCloud.description');
 	}
 
-/*
-	function _cacheMiss(&$cache, $id) {
-		$keywordMap = array();
-		$publishedArticleDao =& DAORegistry::getDAO('PublishedArticleDAO');
-		$publishedArticles =& $publishedArticleDao->getPublishedArticlesByJournalId($cache->getCacheId());
-		while ($publishedArticle =& $publishedArticles->next()) {
-			$keywords = array_map('trim', explode(';', $publishedArticle->getLocalizedSubject()));
-			foreach ($keywords as $keyword) if (!empty($keyword)) $keywordMap[$keyword]++;
-			unset($publishedArticle);
-		}
-		arsort($keywordMap, SORT_NUMERIC);
-
-		$i=0;
-		$newKeywordMap = array();
-		foreach ($keywordMap as $k => $v) {
-			$newKeywordMap[$k] = $v;
-			if ($i++ >= KEYWORD_BLOCK_MAX_ITEMS) break;
-		}
-
-		$cache->setEntireCache($newKeywordMap);
-		return $newKeywordMap[$id];
-	}
-*/
-
 	/**
 	 * Get the HTML contents for this block.
 	 * @param $templateMgr object
@@ -72,24 +49,24 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
                 $journalId = $journal->getId();
 		$article_ids = array();
 
+		//Get all published Articles of this Journal
 		$publishedArticleDao = DAORegistry::getDAO('PublishedArticleDAO');
         	$publishedArticles =& $publishedArticleDao->getPublishedArticlesByJournalId($journalId, $rangeInfo = null, $reverse = true);
+
+		//Get all IDs of the published Articles
 		while ($publishedArticle = $publishedArticles->next()) {
 			$articleId = $publishedArticle->getId();
 			array_push($article_ids, $articleId);
 		}
 
-
+		//Get all Keywords from the published articles of this jorunal
 		$submissionKeywordDao = DAORegistry::getDAO('SubmissionKeywordDAO');
-
 		$article_keywords = array();
-/*
-		array_push($article_ids, 13, 22);
-*/
 		foreach ($article_ids as $article_id) {
 				array_push($article_keywords, $submissionKeywordDao->getKeywords($article_id, array(AppLocale::getLocale())));
 			}
 
+		//Put all Keywords from many arrays in on array
 		$all_keywords = array();
 		foreach($article_keywords as $keywords) {
 			foreach($keywords as $keyword) {
@@ -98,38 +75,31 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
 				}
 			}
 		}
-					
+
+		//Count the keywords					
 		$count_keywords = (array_count_values($all_keywords));
+
+		//Sort the keywords frequency-based
+                arsort($count_keywords, SORT_NUMERIC);
+
+		//Put only the 20 most often used keywords in an array
+		$i=0;
+                $newCount = array();
+                foreach ($count_keywords as $c => $v) {
+                        $newCount[$c] = $v;
+                        if ($i++ >= 19) break;
+                }
+
+		//Now sort the array alphabetically
+                ksort($newCount);
+
+		//Get the frequency of the most often used keyword
+		$maxOccurs = max($count_keywords);
                 
-		$templateMgr->assign('article_keywords', $count_keywords);
-
-/*                $templateMgr->assign('keywords', $submissionKeywordDao->getKeywords($article->getId(), array(AppLocale::getLocale()))); */
-
-
-/*
-$templateMgr->assign('articles', $articles->toArray());*/
-
-/*
-		$cacheManager =& CacheManager::getManager();
-
-		$cache =& $cacheManager->getFileCache('keywords_' . AppLocale::getLocale(), $journal->getId(), array(&$this, '_cacheMiss'));
-		// If the cache is older than a couple of days, regenerate it
-		if (time() - $cache->getCacheTime() > 60 * 60 * 24 * KEYWORD_BLOCK_CACHE_DAYS) $cache->flush();
-
-		$keywords =& $cache->getContents();
-		if (empty($keywords)) return '';
-
-		var_dump($cache);
-
-		// Get the max occurrences for all keywords
-		$maxOccurs = array_shift(array_values($keywords));
-
-		// Now sort the array alphabetically
-		ksort($keywords);
-
-		$templateMgr->assign_by_ref('cloudKeywords', $keywords);
+		//send both to the template
+		$templateMgr->assign('article_keywords', $newCount);
 		$templateMgr->assign_by_ref('maxOccurs', $maxOccurs);
-*/
+
 		return parent::getContents($templateMgr);
 	}
 
