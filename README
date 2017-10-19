@@ -1,0 +1,33 @@
+=============================================================
+=== Keyword Cloud Plugin
+=== Version: 1.0
+=== Changed by: Daniela Wolf <wolf_daniela@ub.uni-heidelberg.de>
+=== Original Author: John Willinsky, Simon Fraser University Library
+=============================================================
+
+About
+-----
+This plugin provides the sidebar with an keyword cloud.
+
+License
+-------
+This plugin is licensed under the GNU General Public License v3.
+
+System Requirements
+-------------------
+This plugin is compatible with...
+ - OJS 3.0.x
+
+Installation
+------------
+To install the plugin:
+ - Unpack the plugin tar.gz file to your plugins/generic directory
+ - From your application's installation directory, run the upgrade script:
+    $ php tools/upgrade.php upgrade
+   (NOTE: It is recommended to back up your database first.)
+
+
+Contact/Support
+---------------
+Documentation, bug listings, and updates can be found on this plugin's homepage
+ <https://gitlab.ub.uni-heidelberg.de/ojs-omp/plugin-keyword-cloud>.
