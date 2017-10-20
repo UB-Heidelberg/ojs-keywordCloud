@@ -9,6 +9,8 @@
  * Keyword cloud block plugin
  *
  *}
+
+{if $article_keywords}
 <div class="pkp_block block_keywords">
 	<span class="title">{translate key="plugins.block.keywordCloud.title"}</span>
         <span class="content">
@@ -19,3 +21,4 @@
 			{/foreach}
         </span>
 </div>
+{/if}

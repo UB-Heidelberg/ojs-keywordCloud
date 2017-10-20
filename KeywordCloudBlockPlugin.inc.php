@@ -15,11 +15,8 @@
  */
 
 import('lib.pkp.classes.plugins.BlockPlugin');
-import('lib.pkp.classes.controlledVocab.ControlledVocabEntryDAO');
-import('classes.article.ArticleDAO');
 
 define('KEYWORD_BLOCK_MAX_ITEMS', 20);
-define('KEYWORD_BLOCK_CACHE_DAYS', 2);
 
 class KeywordCloudBlockPlugin extends BlockPlugin {
 	/**
@@ -53,6 +50,7 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
 		$publishedArticleDao = DAORegistry::getDAO('PublishedArticleDAO');
         	$publishedArticles =& $publishedArticleDao->getPublishedArticlesByJournalId($journalId, $rangeInfo = null, $reverse = true);
 
+
 		//Get all IDs of the published Articles
 		while ($publishedArticle = $publishedArticles->next()) {
 			$articleId = $publishedArticle->getId();
@@ -66,7 +64,7 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
 				array_push($article_keywords, $submissionKeywordDao->getKeywords($article_id, array(AppLocale::getLocale())));
 			}
 
-		//Put all Keywords from many arrays in on array
+		//Put all Keywords from many arrays in one array
 		$all_keywords = array();
 		foreach($article_keywords as $keywords) {
 			foreach($keywords as $keyword) {
@@ -82,16 +80,16 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
 		//Sort the keywords frequency-based
                 arsort($count_keywords, SORT_NUMERIC);
 
-		//Put only the 20 most often used keywords in an array
+		//Put only the most often used keywords in an array
 		$i=0;
                 $newCount = array();
                 foreach ($count_keywords as $c => $v) {
                         $newCount[$c] = $v;
-                        if ($i++ >= 19) break;
+                        if ($i++ > KEYWORD_BLOCK_MAX_ITEMS) break;
                 }
 
 		//Now sort the array alphabetically
-                ksort($newCount);
+                ksort($newCount, SORT_FLAG_CASE | SORT_NATURAL);
 
 		//Get the frequency of the most often used keyword
 		$maxOccurs = max($count_keywords);
