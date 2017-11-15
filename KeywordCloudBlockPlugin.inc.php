@@ -37,70 +37,52 @@ class KeywordCloudBlockPlugin extends BlockPlugin {
 	/**
 	 * Get the HTML contents for this block.
 	 * @param $templateMgr object
-	 * @return $string
+	 * @param $request PKPRequest
+	 * @return string
 	 */
 
 
-	function getContents(&$templateMgr, $request = null) {
-                $journal = $request->getJournal();
-                $journalId = $journal->getId();
-		$article_ids = array();
+	function getContents($templateMgr, $request = null) {
+		$journal = $request->getJournal();
+		$journalId = $journal->getId();
 
 		//Get all published Articles of this Journal
 		$publishedArticleDao = DAORegistry::getDAO('PublishedArticleDAO');
-        	$publishedArticles =& $publishedArticleDao->getPublishedArticlesByJournalId($journalId, $rangeInfo = null, $reverse = true);
-
+        $publishedArticles =& $publishedArticleDao->getPublishedArticlesByJournalId($journalId, $rangeInfo = null, $reverse = true);
 
 		//Get all IDs of the published Articles
+        $submissionKeywordDao = DAORegistry::getDAO('SubmissionKeywordDAO');
+        //Get all Keywords from all published articles of this journal
+        $all_keywords = array();
 		while ($publishedArticle = $publishedArticles->next()) {
-			$articleId = $publishedArticle->getId();
-			array_push($article_ids, $articleId);
-		}
-
-		//Get all Keywords from the published articles of this jorunal
-		$submissionKeywordDao = DAORegistry::getDAO('SubmissionKeywordDAO');
-		$article_keywords = array();
-		foreach ($article_ids as $article_id) {
-				array_push($article_keywords, $submissionKeywordDao->getKeywords($article_id, array(AppLocale::getLocale())));
-			}
-
-		//Put all Keywords from many arrays in one array
-		$all_keywords = array();
-		foreach($article_keywords as $keywords) {
-			foreach($keywords as $keyword) {
-				foreach($keyword as $k) {
-				array_push($all_keywords, $k);
-				}
-			}
+            $article_keywords = $submissionKeywordDao->getKeywords($publishedArticle->getId(),
+				array(AppLocale::getLocale()))[AppLocale::getLocale()];
+			$all_keywords = array_merge($all_keywords, $article_keywords);
 		}
 
 		//Count the keywords					
-		$count_keywords = (array_count_values($all_keywords));
+		$count_keywords = array_count_values($all_keywords);
 
 		//Sort the keywords frequency-based
-                arsort($count_keywords, SORT_NUMERIC);
+		arsort($count_keywords, SORT_NUMERIC);
 
-		//Put only the most often used keywords in an array
-		$i=0;
-                $newCount = array();
-                foreach ($count_keywords as $c => $v) {
-                        $newCount[$c] = $v;
-                        if ($i++ > KEYWORD_BLOCK_MAX_ITEMS) break;
-                }
+		// Put only the most often used keywords in an array
+		// maximum of KEYWORD_BLOCK_MAX_ITEMS
+		$top_keywords = array_slice($count_keywords, 0, KEYWORD_BLOCK_MAX_ITEMS);
 
 		//Now sort the array alphabetically
-                ksort($newCount, SORT_FLAG_CASE | SORT_NATURAL);
+		ksort($top_keywords, SORT_FLAG_CASE | SORT_NATURAL);
 
-		//Get the frequency of the most often used keyword
-		$maxOccurs = max($count_keywords);
+		// Get the frequency of the most often used keyword,
+		// because it is sorted it is the first element
+		$maxOccurs = reset($count_keywords);
                 
 		//send both to the template
-		$templateMgr->assign('article_keywords', $newCount);
+		$templateMgr->assign('article_keywords', $top_keywords);
 		$templateMgr->assign_by_ref('maxOccurs', $maxOccurs);
 
 		return parent::getContents($templateMgr);
 	}
-
 }
 
 ?>

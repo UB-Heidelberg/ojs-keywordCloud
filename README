@@ -21,7 +21,7 @@ This plugin is compatible with...
 Installation
 ------------
 To install the plugin:
- - Unpack the plugin tar.gz file to your plugins/generic directory
+ - Unpack the plugin tar.gz file to your plugins/blocks directory
  - From your application's installation directory, run the upgrade script:
     $ php tools/upgrade.php upgrade
    (NOTE: It is recommended to back up your database first.)
