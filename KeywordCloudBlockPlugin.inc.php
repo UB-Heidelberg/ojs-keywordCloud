@@ -6,7 +6,9 @@
  * Copyright (c) 2013-2016 Simon Fraser University Library
  * Copyright (c) 2003-2016 John Willinsky
  * Changed for OJS 3 by Daniela Wolf, Heidelberg University Library
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Distributed under the GNU GPL v3.
+ *
+ * For full terms see the file LICENCE.
  *
  * @class KeywordCloudBlockPlugin
  * @ingroup plugins_blocks_keyword_cloud
