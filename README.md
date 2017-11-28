@@ -9,7 +9,8 @@
 
 This plugin provides the sidebar with an keyword cloud.
 
-![alt text](https://github.com/UB-Heidelberg/ojs-keywordCloud/raw/master/demo.ong "")
+![alt text](https://raw.githubusercontent.com/UB-Heidelberg/ojs-keywordCloud/master/demo.png "")
+
 # License
 
 This plugin is licensed under the GNU General Public License v3.
