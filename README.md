@@ -42,4 +42,4 @@ To install the plugin:
 # Contact/Support
 
 Documentation, bug listings, and updates can be found on this plugin's homepage
- <https://gitlab.ub.uni-heidelberg.de/ojs-omp/plugin-keyword-cloud>.
+ <https://github.com/UB-Heidelberg/ojs-keywordCloud>.
